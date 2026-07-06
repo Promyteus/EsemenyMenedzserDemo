@@ -16,9 +16,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.10" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EsemenyMenedzser.BLL\EsemenyMenedzser.BLL.csproj" />
     <ProjectReference Include="..\EsemenyMenedzser.DAL\EsemenyMenedzser.DAL.csproj" />
   </ItemGroup>
 
