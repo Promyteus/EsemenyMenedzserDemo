@@ -51,6 +51,22 @@ namespace EsemenyMenedzser.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Esemenyek",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nev = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Helyszin = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Orszag = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Kapacitas = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Esemenyek", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -213,6 +229,9 @@ namespace EsemenyMenedzser.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Esemenyek");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

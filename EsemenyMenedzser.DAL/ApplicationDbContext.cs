@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using EsemenyMenedzser.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,7 @@ namespace EsemenyMenedzser.DAL
         {
         }
 
-        // public DbSet<Esemény> Esemenyek { get; set; }
+         public DbSet<Esemeny> Esemenyek { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
