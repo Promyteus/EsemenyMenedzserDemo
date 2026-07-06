@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="EsemenyMenedzser.BLL/EsemenyMenedzser.BLL.csproj" Id="20c8fca3-9b37-42a6-9b41-4b74138de953" />
+  <Project Path="EsemenyMenedzser.DAL/EsemenyMenedzser.DAL.csproj" Id="2ba70162-7f0a-4a4c-9716-efa19d761269" />
+  <Project Path="EsemenyMenedzser/EsemenyMenedzser.csproj" />
+</Solution>
