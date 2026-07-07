@@ -1,5 +1,6 @@
 ﻿using EsemenyMenedzser.BLL.Services.Interfaces;
 using EsemenyMenedzser.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EsemenyMenedzser.Controllers
@@ -29,6 +30,7 @@ namespace EsemenyMenedzser.Controllers
         }
 
         [HttpPost("logout")]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _authService.LogoutAsync();

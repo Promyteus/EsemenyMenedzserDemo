@@ -7,6 +7,7 @@ using EsemenyMenedzser.BLL.Services;
 using EsemenyMenedzser.BLL.Services.Interfaces;
 using EsemenyMenedzser.DAL;
 using EsemenyMenedzser.DAL.Entities;
+using EsemenyMenedzser.DAL.Seed;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +53,24 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseAuthorization();
 
 app.MapControllers();
+
+// --- SEEDING START ---
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await IdentityDataSeeder.SeedTechnicalUserAsync(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the technical user.");
+    }
+}
+// --- SEEDING END ---
 
 app.Run();

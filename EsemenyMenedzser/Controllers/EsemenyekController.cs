@@ -3,12 +3,14 @@ using EsemenyMenedzser.BLL.Modul.Esemeny.Commands;
 using EsemenyMenedzser.BLL.Modul.Esemeny.DTOs;
 using EsemenyMenedzser.BLL.Modul.Esemeny.Queries;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EsemenyMenedzser.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class EsemenyekController : ControllerBase
     {
         private readonly ICQRSExecutor _executor;

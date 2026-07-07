@@ -22,7 +22,7 @@ namespace EsemenyMenedzser.BLL.Services
                 return (false, "Invalid email or password.", null);
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
