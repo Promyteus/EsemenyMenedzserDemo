@@ -1,6 +1,13 @@
+using EsemenyMenedzser.BLL.CQRS;
+using EsemenyMenedzser.BLL.CQRS.Interfaces;
+using EsemenyMenedzser.BLL.Modul.Esemeny.Commands;
+using EsemenyMenedzser.BLL.Modul.Esemeny.Queries;
+using EsemenyMenedzser.BLL.Modul.Esemeny.Validators;
 using EsemenyMenedzser.BLL.Services;
 using EsemenyMenedzser.BLL.Services.Interfaces;
 using EsemenyMenedzser.DAL;
+using EsemenyMenedzser.DAL.Entities;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -15,6 +22,19 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICQRSExecutor, CQRSExecutor>();
+
+builder.Services.AddScoped<IQueryHandler<GetEsemenyekListQuery, List<Esemeny>>, GetEsemenyekListQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<GetEsemenyByIdQuery, Esemeny?>, GetEsemenyByIdQueryHandler>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateEsemenyCommandValidator>();
+builder.Services.AddScoped<ICommandHandler<CreateEsemenyCommand, int>, CreateEsemenyCommandHandler>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateEsemenyCommandValidator>();
+builder.Services.AddScoped<ICommandHandler<UpdateEsemenyCommand, bool>, UpdateEsemenyCommandHandler>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<DeleteEsemenyCommandValidator>();
+builder.Services.AddScoped<ICommandHandler<DeleteEsemenyCommand, bool>, DeleteEsemenyCommandHandler>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
