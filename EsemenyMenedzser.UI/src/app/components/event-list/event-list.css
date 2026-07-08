@@ -1,0 +1,73 @@
+.list-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.list-header h2 {
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+th {
+  font-weight: bold;
+  color: #555;
+}
+
+td {
+  padding: 16px 8px;
+}
+
+/* Reszponzív kezelés kisebb kijelzőkre: vízszintes görgetés, ha nem fér el */
+@media (max-width: 600px) {
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.btn-edit {
+  color: #6b7280;
+}
+
+.btn-edit:hover {
+  background-color: #f3f4f6;
+}
+
+.btn-delete {
+  color: #ef4444;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+}

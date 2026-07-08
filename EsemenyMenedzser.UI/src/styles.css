@@ -1,1 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+/* Globális segédosztály, hogy a form mezők kitöltsék a kártya szélességét */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+.full-width {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #f5f5f5; /* Kellemes, világosszürke háttér az egész appnak */
+}

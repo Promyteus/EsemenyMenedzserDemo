@@ -1,7 +1,13 @@
-@if (loadingService.isLoading$ | async) {
+@if (loadingService.loading$ | async) {
   <div class="loading-overlay">
     <mat-spinner></mat-spinner>
   </div>
 }
 
-<router-outlet></router-outlet>
+@if (router.url !== '/login') {
+  <app-header></app-header>
+}
+
+<main>
+  <router-outlet></router-outlet>
+</main>

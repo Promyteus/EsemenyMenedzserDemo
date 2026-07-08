@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, tap } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,31 +9,37 @@ import { BehaviorSubject, tap } from 'rxjs';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = 'http://localhost:7087/api/auth';
+  private apiUrl = 'https://localhost:7087/api/auth';
 
-  private loggedInSubject = new BehaviorSubject<boolean>(false);
-  currentUser$ = this.loggedInSubject.asObservable();
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  login(credentials: any) {
-    // `{ withCredentials: true }` is crucial for the browser to accept the cookie from the server!
-    return this.http.post(`${this.apiUrl}/login`, credentials, { withCredentials: true }).pipe(
+  login(credentials: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
       tap(() => {
-        this.loggedInSubject.next(true);
+        this.isAuthenticatedSubject.next(true);
         this.router.navigate(['/events']);
       })
     );
   }
 
-  logout() {
-    return this.http.post(`${this.apiUrl}/logout`, {}, { withCredentials: true }).pipe(
+  logout(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
       tap(() => {
-        this.loggedInSubject.next(false);
+        this.isAuthenticatedSubject.next(false);
         this.router.navigate(['/login']);
       })
-    ).subscribe();
+    );
   }
 
-  isLoggedIn(): boolean {
-    return this.loggedInSubject.value;
+  checkAuthStatus(): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/status`).pipe(
+      tap(res => this.isAuthenticatedSubject.next(res)),
+      catchError(() => {
+        this.isAuthenticatedSubject.next(false);
+        this.router.navigate(['/login']);
+        return of(false);
+      })
+    );
   }
 }
