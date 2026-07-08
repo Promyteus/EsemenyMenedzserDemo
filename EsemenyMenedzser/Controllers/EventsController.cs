@@ -2,9 +2,9 @@
 using EsemenyMenedzser.BLL.Modul.Esemeny.Commands;
 using EsemenyMenedzser.BLL.Modul.Esemeny.DTOs;
 using EsemenyMenedzser.BLL.Modul.Esemeny.Queries;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace EsemenyMenedzser.Controllers
 {
@@ -14,18 +14,22 @@ namespace EsemenyMenedzser.Controllers
     public class EventsController : ControllerBase
     {
         private readonly ICQRSExecutor _executor;
+        private readonly ILogger<EventsController> _logger;
 
-        public EventsController(ICQRSExecutor executor)
+        public EventsController(ICQRSExecutor executor, ILogger<EventsController> logger)
         {
             _executor = executor;
+            _logger = logger;
         }
 
         // 1. GET: api/events
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            _logger.LogInformation("GetAll request started.");
             var query = new GetEventListQuery();
             var events = await _executor.ExecuteQueryAsync(query);
+            _logger.LogInformation("GetAll request completed successfully.");
             return Ok(events);
         }
 
@@ -33,14 +37,17 @@ namespace EsemenyMenedzser.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
+            _logger.LogInformation("GetById request started. Id: {Id}", id);
             var query = new GetEventByIdQuery(id);
             var esemeny = await _executor.ExecuteQueryAsync(query);
 
             if (esemeny == null)
             {
-                return NotFound(new { message = "Event not found." });
+                _logger.LogWarning("Event not found. Id: {Id}", id);
+                throw new KeyNotFoundException($"Event with id {id} not found.");
             }
 
+            _logger.LogInformation("GetById request completed successfully. Id: {Id}", id);
             return Ok(esemeny);
         }
 
@@ -48,77 +55,47 @@ namespace EsemenyMenedzser.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateEventDto dto)
         {
-            try
-            {
-                var command = new CreateEventCommand(dto);
-
-                var id = await _executor.ExecuteCommandAsync(command);
-                return Ok(new { id, message = "Event created successfully." });
-            }
-            catch(ValidationException ex)
-            {
-                var errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage });
-                return BadRequest(new { message = "Validation failed.", errors });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while creating the event.", error = ex.Message });
-            }
+            _logger.LogInformation("Create request started.");
+            var command = new CreateEventCommand(dto);
+            var id = await _executor.ExecuteCommandAsync(command);
+            _logger.LogInformation("Create request completed successfully. Id: {Id}", id);
+            return Ok(new { id, message = "Event created successfully." });
         }
 
         // 4. PUT: api/events
         [HttpPut] 
         public async Task<IActionResult> Update([FromBody] UpdateEventDto dto)
         {
-            try
-            {
-                var command = new UpdateEventCommand(dto);
+            _logger.LogInformation("Update request started. Id: {Id}", dto.Id);
+            var command = new UpdateEventCommand(dto);
+            var success = await _executor.ExecuteCommandAsync(command);
 
-                var success = await _executor.ExecuteCommandAsync(command);
-
-                if (!success)
-                {
-                    return NotFound(new { message = "Event not found." });
-                }
-
-                return Ok(new { message = "Event updated successfully." });
-            }
-            catch (ValidationException ex)
+            if (!success)
             {
-                var errors = ex.Errors.Select(e => new { property = e.PropertyName, message = e.ErrorMessage });
-                return BadRequest(new { message = "Validation failed.", errors });
+                _logger.LogWarning("Event not found for update. Id: {Id}", dto.Id);
+                throw new KeyNotFoundException($"Event with id {dto.Id} not found.");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while updating the event.", error = ex.Message });
-            }
+
+            _logger.LogInformation("Update request completed successfully. Id: {Id}", dto.Id);
+            return Ok(new { message = "Event updated successfully." });
         }
 
         // 5. DELETE: api/events/{id}
         [HttpDelete("{id}")] 
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var command = new DeleteEventCommand(id);
-                var success = await _executor.ExecuteCommandAsync(command);
+            _logger.LogInformation("Delete request started. Id: {Id}", id);
+            var command = new DeleteEventCommand(id);
+            var success = await _executor.ExecuteCommandAsync(command);
 
-                if (!success)
-                {
-                    return NotFound(new { message = "Event not found." });
-                }
+            if (!success)
+            {
+                _logger.LogWarning("Event not found for delete. Id: {Id}", id);
+                throw new KeyNotFoundException($"Event with id {id} not found.");
+            }
 
-                return Ok(new { message = "Event deleted successfully." });
-            }
-            catch (ValidationException ex)
-            {
-                var errors = ex.Errors.Select(e => new { property = e.PropertyName, message = e.ErrorMessage });
-                return BadRequest(new { message = "Validation failed.", errors });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while Deleting the event.", error = ex.Message });
-            }
+            _logger.LogInformation("Delete request completed successfully. Id: {Id}", id);
+            return Ok(new { message = "Event deleted successfully." });
         }
     }
 }

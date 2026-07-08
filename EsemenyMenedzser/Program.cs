@@ -8,12 +8,24 @@ using EsemenyMenedzser.BLL.Services.Interfaces;
 using EsemenyMenedzser.DAL;
 using EsemenyMenedzser.DAL.Entities;
 using EsemenyMenedzser.DAL.Seed;
+using EsemenyMenedzser.Exceptions;
+using EsemenyMenedzser.Logging;
 using FluentValidation;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- LOGGING CONFIGURATION ---
+var logsPath = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddFileLogger(logsPath, (category, logLevel) =>
+{
+    return logLevel >= LogLevel.Information;
+});
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -25,19 +37,20 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 6;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// Cookie-k finomhangolása a helyi fejlesztéshez és a CORS-hoz
+// Cooki configuration to local development and CORS
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.SameSite = SameSiteMode.Lax; // Localhoston a Lax kell, hogy a Chrome átengedje
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // HTTP esetén is engedi localban
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Events.OnRedirectToLogin = context =>
     {
-        context.Response.StatusCode = StatusCodes.Status401Unauthorized; // Ne küldjön HTML login oldalt, API vagyunk!
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         return Task.CompletedTask;
     };
 });
@@ -52,6 +65,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<UpdateEventCommandValidator
 builder.Services.AddScoped<ICommandHandler<UpdateEventCommand, bool>, UpdateEventCommandHandler>();
 builder.Services.AddValidatorsFromAssemblyContaining<DeleteEventCommandValidator>();
 builder.Services.AddScoped<ICommandHandler<DeleteEventCommand, bool>, DeleteEventCommandHandler>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -97,10 +113,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// --- PIPELINE SORREND JAVÍTÁSA ---
-//app.UseHttpsRedirection();
-
-
+app.UseExceptionHandler();
 
 app.UseRouting();
 
