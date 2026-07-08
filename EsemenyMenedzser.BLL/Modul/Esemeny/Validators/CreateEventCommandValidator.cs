@@ -3,16 +3,16 @@ using FluentValidation;
 
 namespace EsemenyMenedzser.BLL.Modul.Esemeny.Validators
 {
-    public class CreateEsemenyCommandValidator : AbstractValidator<CreateEsemenyCommand>
+    public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
     {
-        public CreateEsemenyCommandValidator()
+        public CreateEventCommandValidator()
         {
-            RuleFor(x => x.dto.Nev)
+            RuleFor(x => x.dto.Name)
                 .NotEmpty().WithMessage("This field is required.");
-            RuleFor(x => x.dto.Helyszin)
+            RuleFor(x => x.dto.Location)
                 .NotEmpty().WithMessage("This field is required.")
                 .MaximumLength(100).WithMessage("The field value must be 100 characters or less.");
-            RuleFor(x => x.dto.Kapacitas)
+            RuleFor(x => x.dto.Capacity)
                 .GreaterThanOrEqualTo(0).WithMessage("The field value must be a non-negative number.");
         }
     }

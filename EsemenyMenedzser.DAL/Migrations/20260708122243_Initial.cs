@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EsemenyMenedzser.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,19 +51,19 @@ namespace EsemenyMenedzser.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Esemenyek",
+                name: "Events",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nev = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Helyszin = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Orszag = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Kapacitas = table.Column<int>(type: "int", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Capacity = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Esemenyek", x => x.Id);
+                    table.PrimaryKey("PK_Events", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -231,7 +231,7 @@ namespace EsemenyMenedzser.DAL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Esemenyek");
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

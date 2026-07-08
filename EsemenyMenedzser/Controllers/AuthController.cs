@@ -1,12 +1,14 @@
 ﻿using EsemenyMenedzser.BLL.Services.Interfaces;
 using EsemenyMenedzser.Requests;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EsemenyMenedzser.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors("AngularPolicy")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;

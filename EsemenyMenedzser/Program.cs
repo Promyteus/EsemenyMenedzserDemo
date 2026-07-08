@@ -19,27 +19,54 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// --- IDENTITY MODOSÍTÁS ---
+// Ha tisztán cookie-t szeretnél API endpoints helyett, a hagyományos AddIdentity-t érdemes használni:
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+// Cookie-k finomhangolása a helyi fejlesztéshez és a CORS-hoz
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.Lax; // Localhoston a Lax kell, hogy a Chrome átengedje
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // HTTP esetén is engedi localban
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized; // Ne küldjön HTML login oldalt, API vagyunk!
+        return Task.CompletedTask;
+    };
+});
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICQRSExecutor, CQRSExecutor>();
-
-builder.Services.AddScoped<IQueryHandler<GetEsemenyekListQuery, List<Esemeny>>, GetEsemenyekListQueryHandler>();
-builder.Services.AddScoped<IQueryHandler<GetEsemenyByIdQuery, Esemeny?>, GetEsemenyByIdQueryHandler>();
-
-builder.Services.AddValidatorsFromAssemblyContaining<CreateEsemenyCommandValidator>();
-builder.Services.AddScoped<ICommandHandler<CreateEsemenyCommand, int>, CreateEsemenyCommandHandler>();
-
-builder.Services.AddValidatorsFromAssemblyContaining<UpdateEsemenyCommandValidator>();
-builder.Services.AddScoped<ICommandHandler<UpdateEsemenyCommand, bool>, UpdateEsemenyCommandHandler>();
-
-builder.Services.AddValidatorsFromAssemblyContaining<DeleteEsemenyCommandValidator>();
-builder.Services.AddScoped<ICommandHandler<DeleteEsemenyCommand, bool>, DeleteEsemenyCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<GetEventListQuery, List<Event>>, GetEventListQueryHandler>();
+builder.Services.AddScoped<IQueryHandler<GetEventByIdQuery, Event?>, GetEventByIdQueryHandler>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateEventCommandValidator>();
+builder.Services.AddScoped<ICommandHandler<CreateEventCommand, int>, CreateEventCommandHandler>();
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateEventCommandValidator>();
+builder.Services.AddScoped<ICommandHandler<UpdateEventCommand, bool>, UpdateEventCommandHandler>();
+builder.Services.AddValidatorsFromAssemblyContaining<DeleteEventCommandValidator>();
+builder.Services.AddScoped<ICommandHandler<DeleteEventCommand, bool>, DeleteEventCommandHandler>();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .WithExposedHeaders("Content-Type", "Authorization");
+    });
+});
 
 var app = builder.Build();
 
@@ -50,9 +77,36 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
+// --- EXPLICIT PREFLIGHT HANDLER (OPTIONS) ---
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == HttpMethods.Options)
+    {
+        var origin = context.Request.Headers["Origin"].ToString();
+        if (origin.Contains("localhost:4200"))
+        {
+            context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+            context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            context.Response.Headers.Append("Access-Control-Allow-Headers", context.Request.Headers["Access-Control-Request-Headers"].ToString());
+            context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+        }
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+    await next();
+});
 
-app.UseAuthorization();
+// --- PIPELINE SORREND JAVÍTÁSA ---
+//app.UseHttpsRedirection();
+
+
+
+app.UseRouting();
+
+app.UseCors("AngularPolicy");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

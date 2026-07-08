@@ -11,29 +11,29 @@ namespace EsemenyMenedzser.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class EsemenyekController : ControllerBase
+    public class EventsController : ControllerBase
     {
         private readonly ICQRSExecutor _executor;
 
-        public EsemenyekController(ICQRSExecutor executor)
+        public EventsController(ICQRSExecutor executor)
         {
             _executor = executor;
         }
 
-        // 1. GET: api/esemenyek
+        // 1. GET: api/events
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var query = new GetEsemenyekListQuery();
-            var esemenyek = await _executor.ExecuteQueryAsync(query);
-            return Ok(esemenyek);
+            var query = new GetEventListQuery();
+            var events = await _executor.ExecuteQueryAsync(query);
+            return Ok(events);
         }
 
-        // 2. GET: api/esemenyek/{id}
+        // 2. GET: api/events/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var query = new GetEsemenyByIdQuery(id);
+            var query = new GetEventByIdQuery(id);
             var esemeny = await _executor.ExecuteQueryAsync(query);
 
             if (esemeny == null)
@@ -44,13 +44,13 @@ namespace EsemenyMenedzser.Controllers
             return Ok(esemeny);
         }
 
-        // 3. POST: api/esemenyek
+        // 3. POST: api/events
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateEsemenyDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateEventDto dto)
         {
             try
             {
-                var command = new CreateEsemenyCommand(dto);
+                var command = new CreateEventCommand(dto);
 
                 var id = await _executor.ExecuteCommandAsync(command);
                 return Ok(new { id, message = "Event created successfully." });
@@ -66,13 +66,13 @@ namespace EsemenyMenedzser.Controllers
             }
         }
 
-        // 4. PUT: api/esemenyek
+        // 4. PUT: api/events
         [HttpPut] 
-        public async Task<IActionResult> Update([FromBody] UpdateEsemenyDto dto)
+        public async Task<IActionResult> Update([FromBody] UpdateEventDto dto)
         {
             try
             {
-                var command = new UpdateEsemenyCommand(dto);
+                var command = new UpdateEventCommand(dto);
 
                 var success = await _executor.ExecuteCommandAsync(command);
 
@@ -94,13 +94,13 @@ namespace EsemenyMenedzser.Controllers
             }
         }
 
-        // 5. DELETE: api/esemenyek/{id}
+        // 5. DELETE: api/events/{id}
         [HttpDelete("{id}")] 
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var command = new DeleteEsemenyCommand(id);
+                var command = new DeleteEventCommand(id);
                 var success = await _executor.ExecuteCommandAsync(command);
 
                 if (!success)
